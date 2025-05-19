@@ -19,3 +19,7 @@ jobs:
           echo "Running security scan..."
           sleep 10
           echo "Completed security scan..."
+
+      - name: Fail the Job
+        run: |
+          exit 1
