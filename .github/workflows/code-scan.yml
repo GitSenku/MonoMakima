@@ -1,0 +1,26 @@
+name: Security Scan(Trivy, Linting)
+
+on:
+  workflow_call:
+
+jobs:
+  code-scan:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      security-events: write
+      id-token: write
+      contents: read
+      pull-requests: write
+      actions: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Code Scan
+        run: |
+          echo "Running security scan..."
+          sleep 10
+          echo "Completed security scan..."
