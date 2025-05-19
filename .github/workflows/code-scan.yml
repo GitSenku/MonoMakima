@@ -2,6 +2,7 @@ name: Security Scan(Trivy, Linting)
 
 on:
   workflow_call:
+  pull_request:
 
 jobs:
   code-scan:
