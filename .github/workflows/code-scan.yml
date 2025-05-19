@@ -10,12 +10,6 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
-    permissions:
-      security-events: write
-      id-token: write
-      contents: read
-      pull-requests: write
-      actions: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
