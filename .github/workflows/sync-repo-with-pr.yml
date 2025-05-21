@@ -1,0 +1,90 @@
+name: Cross-Repo Sync and PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      source-repo:
+        description: "The full name (org/repo) of the source repository to sync from"
+        required: false
+        type: string
+        default: "None"
+      source-branch:
+        description: "The branch name in the source repository to sync from"
+        required: false
+        type: string
+        default: "main"
+      destination-repo:
+        description: "The full name (org/repo) of the destination repository to sync to"
+        required: false
+        type: string
+        default: "None"
+      destination-branch:
+        description: "The branch name in the destination repository to sync to"
+        required: false
+        type: string
+        default: "main"
+      sync-operation:
+        description: "The type of sync operation to perform (pull request or force push)"
+        required: false
+        type: string
+        default: "pull_request"
+
+jobs:
+  sync-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+        with:
+          fetch-depth: 0
+
+      - name: Generate Repo Sync Workflow Token
+        id: repo-sync-generate-token
+        uses: actions/create-github-app-token@6c406e8a244fdf6bbf79e6cc8a91504a48d2c2ce
+        with:
+          app-id: ${{ env.REPO_SYNC_GITHUB_APP_ID }}
+          private-key: ${{ env.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.source-repo }}
+          ref: ${{ inputs.source-branch }}
+          path: source
+          token: ${{ steps.repo-sync-generate-token.outputs.token }}
+
+      - name: Checkout destination repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.destination-repo }}
+          ref: ${{ inputs.destination-branch }}
+          path: destination
+          token: ${{ steps.repo-sync-generate-token.outputs.token }}
+
+      - name: Copy changes to temp branch
+        run: |
+          cd destination
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          TEMP_BRANCH="${{ inputs.destination-branch }}_temp"
+          git checkout -b "$TEMP_BRANCH"
+
+          # Sync changes from source
+          rsync -av --exclude='.git' ../source/ .
+
+          git add .
+          git commit -m "Sync changes from ${{ inputs.source-repo }}:${{ inputs.source-branch }}"
+          git push origin "$TEMP_BRANCH"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.repo-sync-generate-token.outputs.token }}
+          repository: ${{ inputs.destination-repo }}
+          head: ${{ inputs.destination-branch }}_temp
+          base: ${{ inputs.destination-branch }}
+          title: "Sync changes from ${{ inputs.source-repo }}:${{ inputs.source-branch }}"
+          body: |
+            This PR syncs changes from `${{ inputs.source-repo }}:${{ inputs.source-branch }}` into the destination branch.
