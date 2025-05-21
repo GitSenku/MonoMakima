@@ -1,0 +1,70 @@
+name: Sync Repositories
+on:
+  workflow_call:
+    inputs:
+      source-repo:
+        description: "The full name (org/repo) of the source repository to sync from"
+        required: false
+        type: string
+        default: "None"
+      source-branch:
+        description: "The branch name in the source repository to sync from"
+        required: false
+        type: string
+        default: "main"
+      destination-repo:
+        description: "The full name (org/repo) of the destination repository to sync to"
+        required: false
+        type: string
+        default: "None"
+      destination-branch:
+        description: "The branch name in the destination repository to sync to"
+        required: false
+        type: string
+        default: "main"
+      sync-operation:
+        description: "The type of sync operation to perform (pull request or force push)"
+        required: false
+        type: string
+        default: "pull_request"
+
+jobs:
+  sync-repo:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      actions: read
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO_SYNC_GITHUB_APP_ID: ${{ secrets.REPO_SYNC_GITHUB_APP_ID }}
+      REPO_SYNC_GITHUB_APP_PRIVATE_KEY: ${{ secrets.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+        with:
+          fetch-depth: 0
+
+      - name: Generate Repo Sync Workflow Token
+        id: repo-sync-generate-token
+        uses: actions/create-github-app-token@6c406e8a244fdf6bbf79e6cc8a91504a48d2c2ce
+        with:
+          app-id: ${{ env.REPO_SYNC_GITHUB_APP_ID }}
+          private-key: ${{ env.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      # - name: Sync Repositories
+      #   id: sync-repositories
+      #   uses: ./../../__CHOFER_ACTIONS__/actions/sync-repos/sync-repos
+      #   with:
+      #     source-repo: ${{ inputs.source-repo }}
+      #     source-branch: ${{ inputs.source-branch }}
+      #     destination-repo: ${{ inputs.destination-repo }}
+      #     destination-branch: ${{ inputs.destination-branch }}
+      #     sync-operation: ${{ inputs.sync-operation }}
+      #     github-app-id: ${{ steps.generate-github-app-token.outputs.github-app-id }}
+      #     github-app-private-key: ${{ steps.generate-github-app-token.outputs.github-app-private-key }}
