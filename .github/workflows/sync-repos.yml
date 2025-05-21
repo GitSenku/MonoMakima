@@ -58,6 +58,6 @@ jobs:
         uses: wei/git-sync@v3
         with:
           source_repo: "https://x-access-token:${{steps.repo-sync-generate-token.outputs.token}}@github.com/${{inputs.source-repo}}.git"
-          source_branch: ${{ source-branch }}
+          source_branch: ${{ inputs.source-branch }}
           destination_repo: "https://x-access-token:${{steps.repo-sync-generate-token.outputs.token}}@github.com/${{inputs.destination-repo}}.git"
-          destination_branch: ${{ destination-branch }}
+          destination_branch: ${{ inputs.destination-branch }}
