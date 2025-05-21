@@ -32,6 +32,15 @@ on:
 jobs:
   sync-pr:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO_SYNC_GITHUB_APP_ID: ${{ secrets.REPO_SYNC_GITHUB_APP_ID }}
+      REPO_SYNC_GITHUB_APP_PRIVATE_KEY: ${{ secrets.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
