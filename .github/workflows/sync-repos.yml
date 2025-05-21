@@ -54,14 +54,10 @@ jobs:
           private-key: ${{ env.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
-      # - name: Sync Repositories
-      #   id: sync-repositories
-      #   uses: ./../../__CHOFER_ACTIONS__/actions/sync-repos/sync-repos
-      #   with:
-      #     source-repo: ${{ inputs.source-repo }}
-      #     source-branch: ${{ inputs.source-branch }}
-      #     destination-repo: ${{ inputs.destination-repo }}
-      #     destination-branch: ${{ inputs.destination-branch }}
-      #     sync-operation: ${{ inputs.sync-operation }}
-      #     github-app-id: ${{ steps.generate-github-app-token.outputs.github-app-id }}
-      #     github-app-private-key: ${{ steps.generate-github-app-token.outputs.github-app-private-key }}
+      - name: Set up Git
+        uses: wei/git-sync@v3
+        with:
+          source_repo: "https://x-access-token:${{steps.repo-sync-generate-token.outputs.token}}@github.com/GitSenku/DevPiece.git"
+          source_branch: "main"
+          destination_repo: "https://x-access-token:${{steps.repo-sync-generate-token.outputs.token}}@github.com/GitSenku/StoneScript.git"
+          destination_branch: "feature/test"
