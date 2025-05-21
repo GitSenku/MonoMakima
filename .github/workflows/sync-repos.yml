@@ -36,7 +36,6 @@ jobs:
       cancel-in-progress: true
     permissions:
       contents: write
-      actions: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       REPO_SYNC_GITHUB_APP_ID: ${{ secrets.REPO_SYNC_GITHUB_APP_ID }}
