@@ -1,7 +1,7 @@
 name: Cross-Repo Sync and PR
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       source-repo:
         description: "The full name (org/repo) of the source repository to sync from"
