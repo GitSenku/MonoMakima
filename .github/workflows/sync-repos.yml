@@ -57,7 +57,7 @@ jobs:
       - name: Set up Git
         uses: wei/git-sync@v3
         with:
-          source_repo: "https://x-access-token:${{steps.repo-sync-generate-token.outputs.token}}@github.com/GitSenku/DevPiece.git"
-          source_branch: "main"
-          destination_repo: "https://x-access-token:${{steps.repo-sync-generate-token.outputs.token}}@github.com/GitSenku/StoneScript.git"
-          destination_branch: "feature/test"
+          source_repo: "https://x-access-token:${{steps.repo-sync-generate-token.outputs.token}}@github.com/${{inputs.source-repo}}.git"
+          source_branch: ${{ source-branch }}
+          destination_repo: "https://x-access-token:${{steps.repo-sync-generate-token.outputs.token}}@github.com/${{inputs.destination-repo}}.git"
+          destination_branch: ${{ destination-branch }}
