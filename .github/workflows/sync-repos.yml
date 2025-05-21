@@ -35,7 +35,7 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     permissions:
-      contents: write
+      contents: read
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       REPO_SYNC_GITHUB_APP_ID: ${{ secrets.REPO_SYNC_GITHUB_APP_ID }}
