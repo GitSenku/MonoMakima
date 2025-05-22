@@ -55,45 +55,56 @@ jobs:
           private-key: ${{ env.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
-      - name: Checkout source repo
-        uses: actions/checkout@v4
+      - name: Commit and Raise a PR
+        id: commit-and-raise-pr
+        uses: ./actions/
         with:
-          repository: ${{ inputs.source-repo }}
-          ref: ${{ inputs.source-branch }}
-          path: source
-          token: ${{ steps.repo-sync-generate-token.outputs.token }}
+            source_repo: ${{ inputs.source-repo }}
+            source_branch: ${{ inputs.source-branch }}
+            destination_repo: ${{ inputs.destination-repo }}
+            destination_branch: ${{ inputs.destination-branch }}
+            sync_operation: "pull_request"
+            github_token: ${{ steps.repo-sync-generate-token.outputs.token }}
 
-      - name: Checkout destination repo
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ inputs.destination-repo }}
-          ref: ${{ inputs.destination-branch }}
-          path: destination
-          token: ${{ steps.repo-sync-generate-token.outputs.token }}
+      # - name: Checkout source repo
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: ${{ inputs.source-repo }}
+      #     ref: ${{ inputs.source-branch }}
+      #     path: source
+      #     token: ${{ steps.repo-sync-generate-token.outputs.token }}
 
-      - name: Copy changes to temp branch
-        run: |
-          cd destination
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      # - name: Checkout destination repo
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: ${{ inputs.destination-repo }}
+      #     ref: ${{ inputs.destination-branch }}
+      #     path: destination
+      #     token: ${{ steps.repo-sync-generate-token.outputs.token }}
 
-          TEMP_BRANCH="${{ inputs.destination-branch }}_temp"
-          git checkout -b "$TEMP_BRANCH"
+      # - name: Copy changes to temp branch
+      #   run: |
+      #     cd destination
+      #     git config user.name "github-actions[bot]"
+      #     git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Sync changes from source
-          rsync -av --delete --exclude='.git' source/ ./
+      #     TEMP_BRANCH="${{ inputs.destination-branch }}_temp"
+      #     git checkout -b "$TEMP_BRANCH"
 
-          git add .
-          git commit -m "Sync changes from ${{ inputs.source-repo }}:${{ inputs.source-branch }}"
-          git push origin "$TEMP_BRANCH"
+      #     # Sync changes from source
+      #     rsync -av --delete --exclude='.git' source/ ./
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ steps.repo-sync-generate-token.outputs.token }}
-          commit-message: "Sync from ${{ inputs.source-repo }}:${{ inputs.source-branch }}"
-          branch: ${{ inputs.destination-branch }}_temp
-          base: ${{ inputs.destination-branch }}
-          title: "Sync from ${{ inputs.source-repo }}:${{ inputs.source-branch }}"
-          body: |
-            This pull request was created automatically to sync the snapshot from `${{ inputs.source-repo }}:${{ inputs.source-branch }}` into `${{ inputs.destination-branch }}`.
+      #     git add .
+      #     git commit -m "Sync changes from ${{ inputs.source-repo }}:${{ inputs.source-branch }}"
+      #     git push origin "$TEMP_BRANCH"
+
+      # - name: Create Pull Request
+      #   uses: peter-evans/create-pull-request@v7
+      #   with:
+      #     token: ${{ steps.repo-sync-generate-token.outputs.token }}
+      #     commit-message: "Sync from ${{ inputs.source-repo }}:${{ inputs.source-branch }}"
+      #     branch: ${{ inputs.destination-branch }}_temp
+      #     base: ${{ inputs.destination-branch }}
+      #     title: "Sync from ${{ inputs.source-repo }}:${{ inputs.source-branch }}"
+      #     body: |
+      #       This pull request was created automatically to sync the snapshot from `${{ inputs.source-repo }}:${{ inputs.source-branch }}` into `${{ inputs.destination-branch }}`.
