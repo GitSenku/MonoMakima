@@ -140,7 +140,7 @@ function commitChanges(tempBranch, githubToken, destinationRepo) {
         yield execPromise(`git config user.email "github-actions[bot]@users.noreply.github.com"`);
         yield execPromise(`git add .`);
         yield execPromise(`git commit -m "Sync changes from source repository"`);
-        yield execPromise(`git remote add destination https://x-access-token:${githubToken}}@github.com/${destinationRepo}.git`);
+        yield execPromise(`git remote add destination https://x-access-token:${githubToken}@github.com/${destinationRepo}.git`);
         yield execPromise(`git push destination ${tempBranch}`);
     });
 }
