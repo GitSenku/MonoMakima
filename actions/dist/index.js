@@ -105,7 +105,7 @@ function syncRepositories(inputs) {
         const octokit = new rest_1.Octokit({ auth: githubToken });
         const tempBranch = `sync-${Date.now()}`;
         yield createBranch(octokit, destinationRepo, destinationBranch, tempBranch);
-        yield fetchSourceChanges(sourceRepo, sourceBranch, destinationRepo, tempBranch);
+        yield fetchSourceChanges(sourceRepo, sourceBranch, destinationRepo, tempBranch, githubToken);
         yield commitChanges(tempBranch);
         yield createPullRequest(octokit, destinationRepo, tempBranch, destinationBranch);
     });
@@ -126,10 +126,11 @@ function createBranch(octokit, repo, baseBranch, newBranch) {
         });
     });
 }
-function fetchSourceChanges(sourceRepo, sourceBranch, destinationRepo, tempBranch) {
+function fetchSourceChanges(sourceRepo, sourceBranch, destinationRepo, tempBranch, githubToken) {
     return __awaiter(this, void 0, void 0, function* () {
         yield execPromise(`git clone --single-branch --branch ${sourceBranch} https://github.com/${sourceRepo}.git`);
-        yield execPromise(`git remote add destination https://github.com/${destinationRepo}.git`);
+        // await execPromise(`git remote add destination https://github.com/${destinationRepo}.git`);
+        yield execPromise(`git remote add destination https://x-access-token:${githubToken}}@github.com/${destinationRepo}.git`);
         yield execPromise(`git checkout -b ${tempBranch}`);
         yield execPromise(`git pull origin ${sourceBranch}`);
     });
