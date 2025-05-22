@@ -81,9 +81,10 @@ jobs:
           git checkout -b $TEMP_BRANCH
           echo "TEMP_BRANCH=$TEMP_BRANCH" >> $GITHUB_ENV
 
-      - name: Add source repository as remote and fetch
+      - name: Add or update source repository as remote and fetch
         run: |
-          git remote add source https://x-access-token:${{ secrets.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}@github.com/${{ inputs.source-repo }}.git
+          git remote remove source || true
+          git remote add source https://x-access-token:${{ env.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}@github.com/${{ inputs.source-repo }}.git
           git fetch source ${{ inputs.source-branch }}
 
       - name: Sync temp branch with source branch as a single commit
