@@ -77,7 +77,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # TEMP_BRANCH="${{ inputs.destination-branch }}_temp"
+          TEMP_BRANCH="${{ inputs.destination-branch }}_temp"
           git checkout -b "$TEMP_BRANCH"
 
           # Sync changes from source
