@@ -105,8 +105,8 @@ function syncRepositories(inputs) {
         const octokit = new rest_1.Octokit({ auth: githubToken });
         const tempBranch = `sync-${Date.now()}`;
         yield createBranch(octokit, destinationRepo, destinationBranch, tempBranch);
-        yield fetchSourceChanges(sourceRepo, sourceBranch, destinationRepo, tempBranch, githubToken);
-        yield commitChanges(tempBranch);
+        yield fetchSourceChanges(sourceRepo, sourceBranch, destinationRepo, tempBranch);
+        yield commitChanges(tempBranch, githubToken, destinationRepo);
         yield createPullRequest(octokit, destinationRepo, tempBranch, destinationBranch);
     });
 }
@@ -126,21 +126,21 @@ function createBranch(octokit, repo, baseBranch, newBranch) {
         });
     });
 }
-function fetchSourceChanges(sourceRepo, sourceBranch, destinationRepo, tempBranch, githubToken) {
+function fetchSourceChanges(sourceRepo, sourceBranch, destinationRepo, tempBranch) {
     return __awaiter(this, void 0, void 0, function* () {
         yield execPromise(`git clone --single-branch --branch ${sourceBranch} https://github.com/${sourceRepo}.git`);
-        // await execPromise(`git remote add destination https://github.com/${destinationRepo}.git`);
-        yield execPromise(`git remote add destination https://x-access-token:${githubToken}}@github.com/${destinationRepo}.git`);
+        yield execPromise(`git remote add destination https://github.com/${destinationRepo}.git`);
         yield execPromise(`git checkout -b ${tempBranch}`);
         yield execPromise(`git pull origin ${sourceBranch}`);
     });
 }
-function commitChanges(tempBranch) {
+function commitChanges(tempBranch, githubToken, destinationRepo) {
     return __awaiter(this, void 0, void 0, function* () {
         yield execPromise(`git config user.name "github-actions[bot]"`);
         yield execPromise(`git config user.email "github-actions[bot]@users.noreply.github.com"`);
         yield execPromise(`git add .`);
         yield execPromise(`git commit -m "Sync changes from source repository"`);
+        yield execPromise(`git remote add destination https://x-access-token:${githubToken}}@github.com/${destinationRepo}.git`);
         yield execPromise(`git push destination ${tempBranch}`);
     });
 }
