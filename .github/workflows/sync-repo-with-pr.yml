@@ -81,7 +81,8 @@ jobs:
           git checkout -b "$TEMP_BRANCH"
 
           # Sync changes from source
-          rsync -av --exclude='.git' ../source/ .
+          # rsync -av --exclude='.git' ../source/ .
+          rsync -av --delete --exclude='.git' ../source/ .
 
           git add .
           git commit -m "Sync changes from ${{ inputs.source-repo }}:${{ inputs.source-branch }}"
