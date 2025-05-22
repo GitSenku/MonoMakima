@@ -83,7 +83,7 @@ jobs:
 
       - name: Sync files from source to destination
         run: |
-          rsync -a --delete --exclude='.git' source-repo/ .
+          rsync -a --delete --delete-excluded --exclude='.git' --ignore-missing-args source-repo/ . || [ $? -eq 24 ]
           git add .
           git commit -m "Sync from ${{ inputs.source-repo }}@${{ inputs.source-branch }} as a single commit" --allow-empty
 
