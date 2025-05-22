@@ -129,7 +129,7 @@ function createBranch(octokit, repo, baseBranch, newBranch) {
 function fetchSourceChanges(sourceRepo, sourceBranch, destinationRepo, tempBranch) {
     return __awaiter(this, void 0, void 0, function* () {
         yield execPromise(`git clone --single-branch --branch ${sourceBranch} https://github.com/${sourceRepo}.git`);
-        yield execPromise(`git remote add destination https://github.com/${destinationRepo}.git`);
+        // await execPromise(`git remote add destination https://github.com/${destinationRepo}.git`);
         yield execPromise(`git checkout -b ${tempBranch}`);
         yield execPromise(`git pull origin ${sourceBranch}`);
     });
