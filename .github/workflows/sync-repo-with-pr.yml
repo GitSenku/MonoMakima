@@ -55,16 +55,70 @@ jobs:
           private-key: ${{ env.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
-      - name: Commit and Raise a PR
-        id: commit-and-raise-pr
-        uses: GitSenku/MonoMakima/actions@main
+      # - name: Checkout source repo
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: ${{ inputs.source-repo }}
+      #     ref: ${{ inputs.source-branch }}
+      #     path: source
+      #     token: ${{ steps.repo-sync-generate-token.outputs.token }}
+
+      - name: Checkout destination repository
+        uses: actions/checkout@v4
         with:
-            source-repo: ${{ inputs.source-repo }}
-            source-branch: ${{ inputs.source-branch }}
-            destination-repo: ${{ inputs.destination-repo }}
-            destination-branch: ${{ inputs.destination-branch }}
-            sync-operation: "pull_request"
-            github-token: ${{ steps.repo-sync-generate-token.outputs.token }}
+          repository: ${{ inputs.destination-repo }}
+          ref: ${{ inputs.destination-branch }}
+          token: ${{ steps.repo-sync-generate-token.outputs.token }}
+
+      - name: Set up git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create temp branch in destination repo
+        run: |
+          TEMP_BRANCH=sync-$(date +%s)
+          git checkout -b $TEMP_BRANCH
+          echo "TEMP_BRANCH=$TEMP_BRANCH" >> $GITHUB_ENV
+
+      - name: Add source repository as remote and fetch
+        run: |
+          git remote add source https://x-access-token:${{ secrets.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}@github.com/${{ inputs.source-repo }}.git
+          git fetch source ${{ inputs.source-branch }}
+
+      - name: Sync temp branch with source branch as a single commit
+        run: |
+          git rm -rf .
+          git clean -fdx
+          git checkout source/${{ inputs.source-branch }} -- .
+          git add .
+          git commit -m "Sync from ${{ inputs.source-repo }}@${{ inputs.source-branch }} as a single commit" --allow-empty
+
+      - name: Push temp branch
+        run: |
+          git push origin ${{ env.TEMP_BRANCH }}
+
+      - name: Create Pull Request using GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}
+        run: |
+          gh pr create \
+          --repo ${{ inputs.destination-repo }} \
+          --head ${{ env.TEMP_BRANCH }} \
+          --base ${{ inputs.destination-branch }} \
+          --title "Synchronize changes" \
+          --body "This pull request synchronizes changes from the source repository."
+
+      # - name: Commit and Raise a PR
+      #   id: commit-and-raise-pr
+      #   uses: GitSenku/MonoMakima/actions@main
+      #   with:
+      #       source-repo: ${{ inputs.source-repo }}
+      #       source-branch: ${{ inputs.source-branch }}
+      #       destination-repo: ${{ inputs.destination-repo }}
+      #       destination-branch: ${{ inputs.destination-branch }}
+      #       sync-operation: "pull_request"
+      #       github-token: ${{ steps.repo-sync-generate-token.outputs.token }}
 
       # - name: Checkout source repo
       #   uses: actions/checkout@v4
