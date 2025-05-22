@@ -1,7 +1,7 @@
 {
   "name": "sync-repo",
   "version": "1.0.0",
-  "main": "lib/index.js",
+  "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write '**/*.{ts,yml}'",
