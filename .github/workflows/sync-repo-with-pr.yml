@@ -70,25 +70,24 @@ jobs:
           token: ${{ steps.repo-sync-generate-token.outputs.token }}
           path: source-repo
 
-      - name: Set up git user
+      - name: Prepare Git in destination repo
+        working-directory: destination-repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Create temp branch in destination repo
-        run: |
-          TEMP_BRANCH=sync-$(date +%s)
-          git checkout -b $TEMP_BRANCH
+          TEMP_BRANCH="sync-$(date +%s)"
+          git checkout -b "$TEMP_BRANCH"
           echo "TEMP_BRANCH=$TEMP_BRANCH" >> $GITHUB_ENV
 
       - name: Sync files from source to destination
         run: |
-          rsync -a --delete --delete-excluded --exclude='.git' --ignore-missing-args source-repo/ . || [ $? -eq 24 ]
-          git add .
-          git commit -m "Sync from ${{ inputs.source-repo }}@${{ inputs.source-branch }} as a single commit" --allow-empty
+          rsync -a --delete --exclude='.git' source-repo/ destination-repo/ || [ $? -eq 24 ]
 
-      - name: Push temp branch
+      - name: Commit and push changes
+        working-directory: destination-repo
         run: |
+          git add .
+          git commit -m "Sync from ${{ inputs.source-repo }}@${{ inputs.source-branch }}" --allow-empty
           git push origin ${{ env.TEMP_BRANCH }}
 
       - name: Create Pull Request using GitHub CLI
@@ -96,11 +95,12 @@ jobs:
           GH_TOKEN: ${{ steps.repo-sync-generate-token.outputs.token }}
         run: |
           gh pr create \
-          --repo ${{ inputs.destination-repo }} \
-          --head ${{ env.TEMP_BRANCH }} \
-          --base ${{ inputs.destination-branch }} \
-          --title "Synchronize changes" \
-          --body "This pull request synchronizes changes from the source repository."
+            --repo ${{ inputs.destination-repo }} \
+            --head ${{ env.TEMP_BRANCH }} \
+            --base ${{ inputs.destination-branch }} \
+            --title "Synchronize changes" \
+            --body "This pull request synchronizes changes from the source repository."
+
 
       # - name: Commit and Raise a PR
       #   id: commit-and-raise-pr
