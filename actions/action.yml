@@ -1,0 +1,24 @@
+name: "GitHub Sync Action"
+description: "A GitHub Action to synchronize two repositories and create a pull request."
+inputs:
+  source_repo:
+    description: "The source repository in the format 'owner/repo'."
+    required: true
+  source_branch:
+    description: "The branch of the source repository to sync from."
+    required: true
+  destination_repo:
+    description: "The destination repository in the format 'owner/repo'."
+    required: true
+  destination_branch:
+    description: "The branch of the destination repository to sync to."
+    required: true
+  sync_operation:
+    description: "The type of sync operation to perform (e.g., 'merge', 'rebase')."
+    required: true
+  github_token:
+    description: "The GitHub App token for authentication."
+    required: true
+runs:
+  using: "node12"
+  main: "dist/main.js"
