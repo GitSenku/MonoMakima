@@ -136,6 +136,8 @@ function fetchSourceChanges(sourceRepo, sourceBranch, destinationRepo, tempBranc
 }
 function commitChanges(tempBranch) {
     return __awaiter(this, void 0, void 0, function* () {
+        yield execPromise(`git config user.name "github-actions[bot]"`);
+        yield execPromise(`git config user.email "github-actions[bot]@users.noreply.github.com"`);
         yield execPromise(`git add .`);
         yield execPromise(`git commit -m "Sync changes from source repository"`);
         yield execPromise(`git push destination ${tempBranch}`);
