@@ -46,6 +46,8 @@ async function fetchSourceChanges(sourceRepo: string, sourceBranch: string, dest
 }
 
 async function commitChanges(tempBranch: string): Promise<void> {
+    await execPromise(`git config user.name "github-actions[bot]"`);
+    await execPromise(`git config user.email "github-actions[bot]@users.noreply.github.com"`);
     await execPromise(`git add .`);
     await execPromise(`git commit -m "Sync changes from source repository"`);
     await execPromise(`git push destination ${tempBranch}`);
