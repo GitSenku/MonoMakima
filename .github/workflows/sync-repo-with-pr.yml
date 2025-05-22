@@ -55,20 +55,20 @@ jobs:
           private-key: ${{ env.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
-      # - name: Checkout source repo
-      #   uses: actions/checkout@v4
-      #   with:
-      #     repository: ${{ inputs.source-repo }}
-      #     ref: ${{ inputs.source-branch }}
-      #     path: source
-      #     token: ${{ steps.repo-sync-generate-token.outputs.token }}
-
       - name: Checkout destination repository
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.destination-repo }}
           ref: ${{ inputs.destination-branch }}
           token: ${{ steps.repo-sync-generate-token.outputs.token }}
+
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.source-repo }}
+          ref: ${{ inputs.source-branch }}
+          token: ${{ steps.repo-sync-generate-token.outputs.token }}
+          path: source-repo
 
       - name: Set up git user
         run: |
@@ -81,17 +81,9 @@ jobs:
           git checkout -b $TEMP_BRANCH
           echo "TEMP_BRANCH=$TEMP_BRANCH" >> $GITHUB_ENV
 
-      - name: Add or update source repository as remote and fetch
+      - name: Sync files from source to destination
         run: |
-          git remote remove source || true
-          git remote add source https://x-access-token:${{ env.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}@github.com/${{ inputs.source-repo }}.git
-          git fetch source ${{ inputs.source-branch }}
-
-      - name: Sync temp branch with source branch as a single commit
-        run: |
-          git rm -rf .
-          git clean -fdx
-          git checkout source/${{ inputs.source-branch }} -- .
+          rsync -a --delete --exclude='.git' source-repo/ .
           git add .
           git commit -m "Sync from ${{ inputs.source-repo }}@${{ inputs.source-branch }} as a single commit" --allow-empty
 
@@ -101,7 +93,7 @@ jobs:
 
       - name: Create Pull Request using GitHub CLI
         env:
-          GH_TOKEN: ${{ secrets.REPO_SYNC_GITHUB_APP_PRIVATE_KEY }}
+          GH_TOKEN: ${{ steps.repo-sync-generate-token.outputs.token }}
         run: |
           gh pr create \
           --repo ${{ inputs.destination-repo }} \
