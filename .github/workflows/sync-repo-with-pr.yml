@@ -59,12 +59,12 @@ jobs:
         id: commit-and-raise-pr
         uses: GitSenku/MonoMakima/actions@main
         with:
-            source_repo: ${{ inputs.source-repo }}
-            source_branch: ${{ inputs.source-branch }}
-            destination_repo: ${{ inputs.destination-repo }}
-            destination_branch: ${{ inputs.destination-branch }}
-            sync_operation: "pull_request"
-            github_token: ${{ steps.repo-sync-generate-token.outputs.token }}
+            source-repo: ${{ inputs.source-repo }}
+            source-branch: ${{ inputs.source-branch }}
+            destination-repo: ${{ inputs.destination-repo }}
+            destination-branch: ${{ inputs.destination-branch }}
+            sync-operation: "pull_request"
+            github-token: ${{ steps.repo-sync-generate-token.outputs.token }}
 
       # - name: Checkout source repo
       #   uses: actions/checkout@v4
