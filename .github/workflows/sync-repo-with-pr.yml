@@ -73,20 +73,19 @@ jobs:
 
       - name: Copy changes to temp branch
         run: |
-          # cd destination
-          # git config user.name "github-actions[bot]"
-          # git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cd destination
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           # TEMP_BRANCH="${{ inputs.destination-branch }}_temp"
-          # git checkout -b "$TEMP_BRANCH"
+          git checkout -b "$TEMP_BRANCH"
 
           # Sync changes from source
-          # rsync -av --exclude='.git' ../source/ .
-          rsync -av --delete --exclude='.git' ../source/ .
+          rsync -av --delete --exclude='.git' source/ ./
 
-          # git add .
-          # git commit -m "Sync changes from ${{ inputs.source-repo }}:${{ inputs.source-branch }}"
-          # git push origin "$TEMP_BRANCH"
+          git add .
+          git commit -m "Sync changes from ${{ inputs.source-repo }}:${{ inputs.source-branch }}"
+          git push origin "$TEMP_BRANCH"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
