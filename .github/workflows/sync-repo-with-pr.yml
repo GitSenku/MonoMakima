@@ -57,7 +57,7 @@ jobs:
 
       - name: Commit and Raise a PR
         id: commit-and-raise-pr
-        uses: ./actions/
+        uses: GitSenku/MonoMakima/actions@main
         with:
             source_repo: ${{ inputs.source-repo }}
             source_branch: ${{ inputs.source-branch }}
